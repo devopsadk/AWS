@@ -283,3 +283,132 @@ terraform.exe validate
 terraform apply
 terraform destroy
 terraform apply --auto-approve
+
+
+---------------------------------------------------------
+
+I am going to create a VPC now with subnets , Internet gateways
+
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      version = "5.26.0"
+    }
+  }
+}
+
+provider "aws" {
+  region     = "us-east-1"
+  access_key = "AKIA6GOZ3X4BS5DDPON7"
+  secret_key = "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"
+}
+
+resource "aws_vpc" "vpcref" {
+  cidr_block       = "10.0.0.0/16"
+  instance_tenancy = "default"
+  enable_dns_hostnames ="true"
+
+  tags = {
+    Name = "myvpc5"
+  }
+}
+
+resource "aws_subnet" "pub11" {
+  vpc_id     = aws_vpc.vpcref.id
+  cidr_block = "10.0.0.0/23"
+  map_public_ip_on_launch ="true"
+
+  tags = {
+    Name = "pub1"
+  }
+}
+
+resource "aws_subnet" "pub12" {
+  vpc_id     = aws_vpc.vpcref.id
+  cidr_block = "10.0.2.0/23"
+  map_public_ip_on_launch ="true"
+
+  tags = {
+    Name = "pub2"
+  }
+}
+
+resource "aws_subnet" "dmz11" {
+  vpc_id     = aws_vpc.vpcref.id
+  cidr_block = "10.0.4.0/23"
+
+  tags = {
+    Name = "dmz1"
+  }
+}
+
+resource "aws_subnet" "dmz12" {
+  vpc_id     = aws_vpc.vpcref.id
+  cidr_block = "10.0.6.0/23"
+
+  tags = {
+    Name = "dmz1"
+  }
+}
+
+
+
+
+resource "aws_internet_gateway" "gw" {
+  vpc_id = aws_vpc.vpcref.id
+
+  tags = {
+    Name = "myigw"
+  }
+}
+
+
+resource "aws_route_table" "pubrt" {
+  vpc_id = aws_vpc.vpcref.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.gw.id
+  }
+
+
+  tags = {
+    Name = "pubrt-vpc5"
+  }
+}
+
+
+resource "aws_route_table" "dmzrt" {
+  vpc_id = aws_vpc.vpcref.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.gw.id
+  }
+
+
+  tags = {
+    Name = "dmzrt-vpc5"
+  }
+}
+
+resource "aws_route_table_association" "apub" {
+  subnet_id      = aws_subnet.pub11.id
+  route_table_id = aws_route_table.pubrt.id
+}
+
+resource "aws_route_table_association" "bpub" {
+  subnet_id      = aws_subnet.pub12.id
+  route_table_id = aws_route_table.pubrt.id
+}
+
+resource "aws_route_table_association" "admz" {
+  subnet_id      = aws_subnet.dmz11.id
+  route_table_id = aws_route_table.dmzrt.id
+}
+
+resource "aws_route_table_association" "bdmz" {
+  subnet_id      = aws_subnet.dmz12.id
+  route_table_id = aws_route_table.dmzrt.id
+}
