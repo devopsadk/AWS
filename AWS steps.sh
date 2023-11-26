@@ -192,3 +192,94 @@ Autoscaling
 
 -------------------------------------------
 
+
+-----------------
+load balancer
+-----------------
+
+
+
+---------
+SNS topics
+---------
+
+
+
+--------
+
+Creating users 
+
+--------
+
+https://975951347459.signin.aws.amazon.com/console
+
+Hari -- Admin user is created
+raju -- Provided policy access to ec2-full access
+ramesh -- Provided policy access to ec2-readonly
+rani -- s3 full access
+
+Groups
+----
+S3usersgroup -- Give s3-full access add raju,ramesh and rani to the group
+
+------ Accessing AWS via  CLI
+
+click on the user and create access key for the user
+download the aws CLI for windows and install it
+aws configure
+
+-------------
+
+
+Terraform
+
+----------------
+
+Install terrform cli for windows and the path of the exe file in the path environment variables of the system
+
+Terrform consists of the below blocks
+
+1. terraform block
+2. provider block
+3. resource block
+4. variable block
+5. input block
+6. output block
+
+
+------------------------------------
+I have created a first code to create a EC2 instance
+
+
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      version = "5.26.0"
+    }
+  }
+}
+
+provider "aws" {
+  region     = "us-east-1"
+  access_key = "AKIA6GOZ3X4BS5DDPON7"
+  secret_key = "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"
+}
+
+resource "aws_instance" "ins" {
+  ami           = "ami-0fcb151e709410607"
+  instance_type = "t2.micro"
+  key_name= "linux"
+
+  tags = {
+    Name = "myterrainstance"
+  }
+}
+-----------------------------------------------------------
+After coding Hit the command 
+terraform.exe init
+terraform.exe plan
+terraform.exe validate
+terraform apply
+terraform destroy
+terraform apply --auto-approve
